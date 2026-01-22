@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "911140333654",
+    "project_id": "earnestfintechassign",
+    "storage_bucket": "earnestfintechassign.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:911140333654:android:f79c1cc75836e3ad25b3f7",
+        "android_client_info": {
+          "package_name": "com.example.assign_earnest_fintech"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4jPbJrJ4PMzUCnZUNMyOU1MBe0-CdYpc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
