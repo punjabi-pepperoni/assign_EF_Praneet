@@ -4,6 +4,7 @@ import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../bloc/auth_bloc.dart';
 import 'signup_page.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
@@ -21,14 +22,27 @@ class LoginPage extends StatelessWidget {
         listener: (context, state) {
           if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
+              SnackBar(
+                content: Text(state.message),
+                duration: const Duration(seconds: 1),
+              ),
             );
           } else if (state is AuthSuccess) {
             // Navigate to Dashboard
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Login Success!")),
+              SnackBar(
+                content: const Text("Login Success!"),
+                duration: const Duration(seconds: 1),
+              ),
             );
             Navigator.pushReplacementNamed(context, '/dashboard');
+          } else if (state is AuthForgotPasswordSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text("Password reset email sent!"),
+                duration: const Duration(seconds: 2),
+              ),
+            );
           }
         },
         child: Stack(
@@ -45,7 +59,7 @@ class LoginPage extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFFF0099).withOpacity(0.5),
+                      color: const Color(0xFFFF0099).withValues(alpha: 0.5),
                       blurRadius: 200, // Increased blur
                       spreadRadius: 80,
                     ),
@@ -55,17 +69,23 @@ class LoginPage extends StatelessWidget {
             ),
             Column(
               children: [
-                const Expanded(
+                Expanded(
                   flex: 2,
                   child: Center(
                     child: Padding(
-                      padding: EdgeInsets.all(20.0),
-                      child: Text(
-                        "Welcome back!",
-                        style: TextStyle(
+                      padding: const EdgeInsets.all(20.0),
+                      child: DefaultTextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
+                        ),
+                        child: AnimatedTextKit(
+                          animatedTexts: [
+                            TypewriterAnimatedText('Welcome back!',
+                                speed: const Duration(milliseconds: 100)),
+                          ],
+                          isRepeatingAnimation: false,
                         ),
                       ),
                     ),
@@ -105,21 +125,29 @@ class LoginPage extends StatelessWidget {
                                 Align(
                                   alignment: Alignment.centerRight,
                                   child: TextButton(
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      _showForgotPasswordDialog(context);
+                                    },
                                     child: const Text("Forgot Password?"),
                                   ),
                                 ),
                                 const SizedBox(
                                     height: 40), // Spacer replacement
-                                CustomButton(
-                                  text: "Log in",
-                                  onPressed: () {
-                                    context.read<AuthBloc>().add(
-                                          LoginRequested(
-                                            email: emailController.text,
-                                            password: passwordController.text,
-                                          ),
-                                        );
+                                BlocBuilder<AuthBloc, AuthState>(
+                                  builder: (context, state) {
+                                    return CustomButton(
+                                      text: "Log in",
+                                      isLoading: state is AuthLoading,
+                                      onPressed: () {
+                                        context.read<AuthBloc>().add(
+                                              LoginRequested(
+                                                email: emailController.text,
+                                                password:
+                                                    passwordController.text,
+                                              ),
+                                            );
+                                      },
+                                    );
                                   },
                                 ),
                                 const SizedBox(height: 20),
@@ -139,7 +167,13 @@ class LoginPage extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     _socialButton(
-                                        "assets/images/google.png"), // Assuming google.png usage
+                                      "assets/images/google.png",
+                                      onTap: () {
+                                        context
+                                            .read<AuthBloc>()
+                                            .add(const GoogleSignInRequested());
+                                      },
+                                    ),
                                     const SizedBox(width: 20),
                                     _socialButton("assets/images/facebook.png"),
                                     const SizedBox(width: 20),
@@ -186,16 +220,53 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  Widget _socialButton(String assetPath) {
-    return Container(
-      width: 70, // Increased size
-      height: 70, // Increased size
-      decoration: const BoxDecoration(
-        // color: Colors.grey.shade100, // Removed grey background
-        shape: BoxShape.circle,
+  Widget _socialButton(String assetPath, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 70, // Increased size
+        height: 70, // Increased size
+        decoration: const BoxDecoration(
+          // color: Colors.grey.shade100, // Removed grey background
+          shape: BoxShape.circle,
+        ),
+        padding: const EdgeInsets.all(8), // Reduced padding
+        child: Image.asset(assetPath),
       ),
-      padding: const EdgeInsets.all(8), // Reduced padding
-      child: Image.asset(assetPath),
+    );
+  }
+
+  void _showForgotPasswordDialog(BuildContext context) {
+    final TextEditingController forgotPasswordController =
+        TextEditingController();
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text("Forgot Password"),
+          content: TextField(
+            controller: forgotPasswordController,
+            decoration:
+                const InputDecoration(hintText: "Enter your email address"),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (forgotPasswordController.text.isNotEmpty) {
+                  context.read<AuthBloc>().add(ForgotPasswordRequested(
+                      email: forgotPasswordController.text));
+                  Navigator.pop(dialogContext);
+                }
+              },
+              child: const Text("Send Reset Email"),
+            ),
+          ],
+        );
+      },
     );
   }
 }

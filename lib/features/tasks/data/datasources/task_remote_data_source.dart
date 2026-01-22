@@ -36,7 +36,7 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
           .map((doc) => TaskModel.fromJson(doc.data() as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      throw ServerFailure();
+      throw ServerFailure(message: e.toString());
     }
   }
 
@@ -48,11 +48,12 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
         id: docRef.id,
         title: title,
         isCompleted: false,
+        userId: _userId,
       );
       await docRef.set(newTask.toJson());
       return newTask;
     } catch (e) {
-      throw ServerFailure();
+      throw ServerFailure(message: e.toString());
     }
   }
 
@@ -62,7 +63,7 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
       await _tasksCollection.doc(task.id).update(task.toJson());
       return task;
     } catch (e) {
-      throw ServerFailure();
+      throw ServerFailure(message: e.toString());
     }
   }
 
@@ -71,7 +72,7 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
     try {
       await _tasksCollection.doc(id).delete();
     } catch (e) {
-      throw ServerFailure();
+      throw ServerFailure(message: e.toString());
     }
   }
 }

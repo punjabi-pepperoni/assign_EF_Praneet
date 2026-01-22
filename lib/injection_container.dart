@@ -12,6 +12,9 @@ import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/domain/repositories/auth_repository.dart';
 import 'features/auth/domain/usecases/login_user.dart';
 import 'features/auth/domain/usecases/register_user.dart';
+import 'features/auth/domain/usecases/google_sign_in.dart';
+import 'features/auth/domain/usecases/logout.dart';
+import 'features/auth/domain/usecases/forgot_password.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 
 import 'features/tasks/data/datasources/task_remote_data_source.dart';
@@ -32,12 +35,18 @@ Future<void> init() async {
     () => AuthBloc(
       loginUser: sl(),
       registerUser: sl(),
+      googleSignIn: sl(),
+      logout: sl(),
+      forgotPassword: sl(),
     ),
   );
 
   // Use cases
   sl.registerLazySingleton(() => LoginUser(sl()));
   sl.registerLazySingleton(() => RegisterUser(sl()));
+  sl.registerLazySingleton(() => GoogleSignInUseCase(sl()));
+  sl.registerLazySingleton(() => Logout(sl()));
+  sl.registerLazySingleton(() => ForgotPassword(sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(

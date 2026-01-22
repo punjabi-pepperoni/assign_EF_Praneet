@@ -9,8 +9,11 @@ class Task extends Equatable {
     required this.id,
     required this.title,
     required this.isCompleted,
+    required this.userId,
   });
 
+  final String userId;
+
   @override
-  List<Object> get props => [id, title, isCompleted];
+  List<Object> get props => [id, title, isCompleted, userId];
 }

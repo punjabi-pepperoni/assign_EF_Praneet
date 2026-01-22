@@ -32,53 +32,49 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     });
 
     on<AddTaskEvent>((event, emit) async {
-      // Optimistic update or reload? Let's reload for simplicity first, or just append
-      // Ideally: emit(TaskLoading()) -> add -> emit(TaskLoaded(newList))
-
-      if (state is TaskLoaded) {
-        // We could show a loading indicator overlay, but for now let's just trigger the add and then reload
+      // Avoid full-screen loading if we already have tasks
+      final currentState = state;
+      if (currentState is TaskLoaded) {
+        final result = await addTask(AddTaskParams(title: event.title));
+        result.fold(
+          (failure) => emit(const TaskError("Failed to add task")),
+          (newTask) => add(LoadTasks()),
+        );
+      } else {
         emit(TaskLoading());
         final result = await addTask(AddTaskParams(title: event.title));
-        result.fold((failure) async {
-          emit(const TaskError("Failed to add task"));
-          // Reload to restore state
-          add(LoadTasks());
-        }, (newTask) {
-          // Append locally immediately for speed? Or wait for reload?
-          // Since we mocked list in data source, we can just reload or append.
-          // Let's just reload to be safe and consistent with "source of truth".
-          add(LoadTasks());
-        });
-      } else {
-        add(LoadTasks());
+        result.fold(
+          (failure) => emit(const TaskError("Failed to add task")),
+          (newTask) => add(LoadTasks()),
+        );
       }
     });
 
     on<UpdateTaskEvent>((event, emit) async {
-      if (state is TaskLoaded) {
-        emit(TaskLoading());
+      final currentState = state;
+      if (currentState is TaskLoaded) {
         final result = await updateTask(UpdateTaskParams(task: event.task));
         result.fold(
-          (failure) {
-            emit(const TaskError("Failed to update task"));
-            add(LoadTasks());
-          },
+          (failure) => emit(const TaskError("Failed to update task")),
           (_) => add(LoadTasks()),
         );
+      } else {
+        emit(TaskLoading());
+        add(LoadTasks());
       }
     });
 
     on<DeleteTaskEvent>((event, emit) async {
-      if (state is TaskLoaded) {
-        emit(TaskLoading());
+      final currentState = state;
+      if (currentState is TaskLoaded) {
         final result = await deleteTask(DeleteTaskParams(id: event.id));
         result.fold(
-          (failure) {
-            emit(const TaskError("Failed to delete task"));
-            add(LoadTasks());
-          },
+          (failure) => emit(const TaskError("Failed to delete task")),
           (_) => add(LoadTasks()),
         );
+      } else {
+        emit(TaskLoading());
+        add(LoadTasks());
       }
     });
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/task.dart';
 import '../bloc/task_bloc.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class TaskItem extends StatelessWidget {
   final Task task;
@@ -27,6 +28,7 @@ class TaskItem extends StatelessWidget {
                 id: task.id,
                 title: task.title,
                 isCompleted: !task.isCompleted,
+                userId: task.userId,
               );
               context.read<TaskBloc>().add(UpdateTaskEvent(updatedTask));
             },
@@ -70,8 +72,19 @@ class TaskItem extends StatelessWidget {
               ],
             ),
           ),
+          // Delete Button
+          IconButton(
+            onPressed: () {
+              context.read<TaskBloc>().add(DeleteTaskEvent(task.id));
+            },
+            icon: const Icon(
+              Icons.delete_outline,
+              color: Colors.redAccent,
+              size: 24,
+            ),
+          ),
         ],
       ),
-    );
+    ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.1);
   }
 }

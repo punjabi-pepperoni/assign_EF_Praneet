@@ -5,13 +5,15 @@ class TaskModel extends Task {
     required super.id,
     required super.title,
     required super.isCompleted,
+    required super.userId,
   });
 
   factory TaskModel.fromJson(Map<String, dynamic> json) {
     return TaskModel(
       id: json['id'],
       title: json['title'],
-      isCompleted: json['isCompleted'],
+      isCompleted: json['isCompleted'] ?? false,
+      userId: json['userId'] ?? '',
     );
   }
 
@@ -20,6 +22,7 @@ class TaskModel extends Task {
       'id': id,
       'title': title,
       'isCompleted': isCompleted,
+      'userId': userId,
     };
   }
 }

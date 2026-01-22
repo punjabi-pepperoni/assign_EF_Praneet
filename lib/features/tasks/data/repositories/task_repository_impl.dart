@@ -34,7 +34,11 @@ class TaskRepositoryImpl implements TaskRepository {
   Future<Either<Failure, Task>> updateTask(Task task) async {
     try {
       final taskModel = TaskModel(
-          id: task.id, title: task.title, isCompleted: task.isCompleted);
+        id: task.id,
+        title: task.title,
+        isCompleted: task.isCompleted,
+        userId: task.userId,
+      );
       final updatedTask = await remoteDataSource.updateTask(taskModel);
       return Right(updatedTask);
     } catch (e) {
