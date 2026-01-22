@@ -72,19 +72,74 @@ class TaskItem extends StatelessWidget {
               ],
             ),
           ),
-          // Delete Button
-          IconButton(
-            onPressed: () {
-              context.read<TaskBloc>().add(DeleteTaskEvent(task.id));
-            },
-            icon: const Icon(
-              Icons.delete_outline,
-              color: Colors.redAccent,
-              size: 24,
-            ),
+          // Action Buttons
+          Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  _showEditDialog(context, task);
+                },
+                icon: const Icon(
+                  Icons.edit_outlined,
+                  color: Colors.blueAccent,
+                  size: 24,
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  context.read<TaskBloc>().add(DeleteTaskEvent(task.id));
+                },
+                icon: const Icon(
+                  Icons.delete_outline,
+                  color: Colors.redAccent,
+                  size: 24,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.1);
+  }
+
+  void _showEditDialog(BuildContext context, Task task) {
+    final TextEditingController controller =
+        TextEditingController(text: task.title);
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text("Edit Task"),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(hintText: "Enter task title"),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (controller.text.isNotEmpty) {
+                  final updatedTask = Task(
+                    id: task.id,
+                    title: controller.text,
+                    isCompleted: task.isCompleted,
+                    userId: task.userId,
+                  );
+                  context.read<TaskBloc>().add(UpdateTaskEvent(updatedTask));
+                  Navigator.pop(dialogContext);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF3F0071),
+                  foregroundColor: Colors.white),
+              child: const Text("Update"),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
